@@ -7,9 +7,12 @@ You can edit this file as you like.
   [ "affjax"
   , "console"
   , "effect"
+  , "foreign"
+  , "foreign-object"
   , "psci-support"
   , "read"
   , "record"
+  , "simple-json"
   , "typelevel-prelude"
   ]
 , packages = ./packages.dhall
