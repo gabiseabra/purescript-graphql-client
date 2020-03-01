@@ -13,6 +13,8 @@ You can edit this file as you like.
   , "read"
   , "record"
   , "simple-json"
+  , "spec"
+  , "spec-discovery"
   , "typelevel-prelude"
   ]
 , packages = ./packages.dhall
