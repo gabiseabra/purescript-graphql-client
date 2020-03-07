@@ -6,9 +6,13 @@ You can edit this file as you like.
 , dependencies =
   [ "affjax"
   , "console"
+  , "coroutines"
   , "effect"
+  , "errorcontrol"
+  , "foldable-traversable"
   , "foreign"
   , "foreign-object"
+  , "pipes"
   , "psci-support"
   , "read"
   , "record"

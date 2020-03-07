@@ -4,7 +4,6 @@ import Prelude
 
 import Control.Monad.Except (runExcept)
 import Data.List.NonEmpty (singleton)
-import Effect.Class.Console (log)
 import Foreign (ForeignError(..), renderForeignError, unsafeToForeign)
 import GraphQL.Parser as Parser
 import GraphQL.Types (GqlError(..))
@@ -24,7 +23,7 @@ spec = do
         builder <-
                 expectRight
             <<< runExcept
-            <<< Parser.parseRecord (Proxy :: Proxy Rec)
+            <<< Parser.gqlBuilder (Proxy :: Proxy Rec)
             $ unsafeToForeign { x: 123, y: "abc" }
         Builder.build builder {} `shouldEqual` { x: 123, y: "abc" }
 
@@ -32,7 +31,7 @@ spec = do
         error <-
                 expectLeft
             <<< runExcept
-            <<< Parser.parseRecord (Proxy :: Proxy Rec)
+            <<< Parser.gqlBuilder (Proxy :: Proxy Rec)
             $ unsafeToForeign { x: 123, y: 123 }
         error `shouldEqual` foreignParseError (ErrorAtProperty "y" (TypeMismatch "String" "Number"))
 

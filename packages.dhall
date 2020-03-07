@@ -121,7 +121,19 @@ let additions =
 let upstream =
       https://github.com/purescript/package-sets/releases/download/psc-0.13.6-20200225/packages.dhall sha256:cceac93c43704cf3e3403fed063e6d123a46b44285b70b76f548b13161d4acb6
 
-let overrides = {=}
+let overrides =
+  { errorcontrol =
+      { dependencies =
+          [ "prelude"
+          , "console"
+          , "transformers"
+          ]
+        , repo =
+          "https://github.com/LukaJCB/purescript-errorcontrol.git"
+        , version =
+          "v0.3.0"
+      }
+  }
 
 let additions = {=}
 
