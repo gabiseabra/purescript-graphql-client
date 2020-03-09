@@ -1,17 +1,29 @@
-module GraphQL.Parser where
+module GraphQL.Builder where
 
 import GraphQL.Types
 import GraphQL.Proxy
 import Prelude
 
 import Control.Monad.Error.Class (class MonadThrow, throwError)
-import Control.Monad.Except (lift, runExcept, runExceptT, withExcept)
-import Data.Either (Either(..), either)
+import Control.Monad.Except (runExcept)
+import Data.Either (either)
 import Foreign (F, Foreign, renderForeignError)
-import Prim.RowList (class RowToList, kind RowList)
+import Prim.RowList (class RowToList)
 import Record.Builder (Builder)
+import Record.Builder as Builder
 import Simple.JSON (class ReadForeignFields, getFields)
 import Type.Data.RowList (RLProxy(..))
+
+
+build ::
+     forall res row proxy m
+   . MonadThrow GqlError m
+  => Rep proxy row
+  => GqlBuilder res row
+  => proxy
+  -> res
+  -> m {|row}
+build rep res = Builder.build <$> gqlBuilder rep res <@> {}
 
 class GqlBuilder
   res

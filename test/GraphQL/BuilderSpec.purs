@@ -1,13 +1,12 @@
-module Test.GraphQL.ParserSpec where
+module Test.GraphQL.BuilderSpec where
 
 import Prelude
 
 import Control.Monad.Except (runExcept)
 import Data.List.NonEmpty (singleton)
 import Foreign (ForeignError(..), renderForeignError, unsafeToForeign)
-import GraphQL.Parser as Parser
+import GraphQL.Builder as Builder
 import GraphQL.Types (GqlError(..))
-import Record.Builder as Builder
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 import Test.Spec.Util (expectLeft, expectRight)
@@ -20,20 +19,18 @@ spec = do
   describe "gqlResultFromRow" do
     describe "parseResult" do
       it "parses record from Foreign" do
-        builder <-
-                expectRight
+        res <-  expectRight
             <<< runExcept
-            <<< Parser.gqlBuilder (Proxy :: Proxy Rec)
+            <<< Builder.build (Proxy :: Proxy Rec)
             $ unsafeToForeign { x: 123, y: "abc" }
-        Builder.build builder {} `shouldEqual` { x: 123, y: "abc" }
+        res `shouldEqual` { x: 123, y: "abc" }
 
       it "fails with invalid properties" do
-        error <-
-                expectLeft
+        err <-  expectLeft
             <<< runExcept
-            <<< Parser.gqlBuilder (Proxy :: Proxy Rec)
+            <<< Builder.build (Proxy :: Proxy Rec)
             $ unsafeToForeign { x: 123, y: 123 }
-        error `shouldEqual` foreignParseError (ErrorAtProperty "y" (TypeMismatch "String" "Number"))
+        err `shouldEqual` foreignParseError (ErrorAtProperty "y" (TypeMismatch "String" "Number"))
 
 foreignParseError :: ForeignError -> GqlError
 foreignParseError e = GqlParserError (singleton $ renderForeignError e)

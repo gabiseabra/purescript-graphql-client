@@ -2,7 +2,6 @@ module GraphQL.Types where
 
 import Prelude
 
-import Control.Monad.Except (Except)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Eq (genericEq)
 import Data.Generic.Rep.Show (genericShow)
@@ -12,6 +11,7 @@ import Data.Symbol (class IsSymbol, SProxy(..), reflectSymbol)
 import Foreign as F
 import Simple.JSON (class ReadForeign)
 import Type.Data.Row (RProxy)
+import Prim.Row as Row
 
 data Typename (ty :: Symbol) = Typename String
 
@@ -28,38 +28,17 @@ instance readForeignTypename :: IsSymbol ty => ReadForeign (Typename ty) where
     then pure $ Typename typename
     else F.fail $ F.TypeMismatch typename value
 
-type GqlRow ty row = ( __typename :: Typename ty | row ) :: # Type
+class GqlRow (ty :: Symbol) (row :: # Type) | row -> ty
 
-type GqlRec ty row = Record (GqlRow ty row) :: Type
+instance gqlRowImpl ::
+  ( IsSymbol ty
+  , Row.Cons "__typename" (Typename ty) tail row
+  ) => GqlRow ty row
 
 data GqlOperationType = Query | Mutation
 
-data GqlOperation input ty row =
-    Op GqlOperationType String (RProxy (GqlRow ty row)) (Record input)
-
-{-
-data GqlExecOperation input ty row =
-    Query String (Proxy (GqlRec ty row)) (Record input)
-  | Mutation String (Proxy (GqlRec ty row)) (Record input)
-
-class 
-  (IsSymbol ty
-  ) <= GqlOperation
-  op input ty row | op -> input ty row where
-  opRep   :: op -> Proxy (GqlRec ty row)
-  opType  :: op -> Typename ty
-  opName  :: op -> String
-  opInput :: op -> Record input
-
-instance gqlExecOperationImpl ::
-  GqlOperation
-  (GqlExecOperation input ty row)
-  input ty row where
-  opRep = snd . snd
-  opType = snd
-  opName = snd
-  opInput = snd
--}
+data GqlOperation input row =
+    Op GqlOperationType String (RProxy row) (Record input)
 
 data GqlError = GqlParserError (NonEmptyList String)
               | GqlEmptyLink
@@ -68,4 +47,4 @@ derive instance genericGqlError :: Generic GqlError _
 instance eqGqlError :: Eq GqlError where eq = genericEq
 instance showGqlError :: Show GqlError where show = genericShow
 
-type GqlRes ty row = { data :: Maybe (GqlRec ty row) }
+type GqlRes row = { data :: Maybe { | row } }
